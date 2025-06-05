@@ -1,0 +1,1 @@
+- dont write your broke ass junior eng comments that explain what the code already says

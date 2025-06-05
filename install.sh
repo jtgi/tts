@@ -52,6 +52,61 @@ chmod +x "$BINDIR/tts" || error "Failed to make tts executable"
 
 success "✓ tts installed to $BINDIR/tts"
 
+# Install shell completions
+install_completions() {
+    local shell_name="$1"
+    local completion_url="$2"
+    local completion_dir="$3"
+    local completion_file="$4"
+    
+    if [ -d "$completion_dir" ]; then
+        info "Installing $shell_name completion..."
+        if curl -fsSL "$completion_url" -o "$completion_dir/$completion_file" 2>/dev/null; then
+            success "✓ $shell_name completion installed"
+        else
+            warning "⚠ Failed to install $shell_name completion (non-fatal)"
+        fi
+    fi
+}
+
+# Try to install completions for common shells
+if [ "$PREFIX" = "/usr/local" ] || [ "$PREFIX" = "/usr" ]; then
+    # System-wide installation
+    install_completions "bash" \
+        "https://raw.githubusercontent.com/jtgi/tts/main/completions/tts.bash" \
+        "/usr/share/bash-completion/completions" \
+        "tts"
+    
+    install_completions "zsh" \
+        "https://raw.githubusercontent.com/jtgi/tts/main/completions/tts.zsh" \
+        "/usr/share/zsh/site-functions" \
+        "_tts"
+else
+    # User installation - try common user directories
+    install_completions "bash" \
+        "https://raw.githubusercontent.com/jtgi/tts/main/completions/tts.bash" \
+        "$HOME/.local/share/bash-completion/completions" \
+        "tts"
+    
+    install_completions "zsh" \
+        "https://raw.githubusercontent.com/jtgi/tts/main/completions/tts.zsh" \
+        "$HOME/.local/share/zsh/site-functions" \
+        "_tts"
+    
+    # Also try XDG directories
+    if [ -n "$XDG_DATA_HOME" ]; then
+        install_completions "bash" \
+            "https://raw.githubusercontent.com/jtgi/tts/main/completions/tts.bash" \
+            "$XDG_DATA_HOME/bash-completion/completions" \
+            "tts"
+        
+        install_completions "zsh" \
+            "https://raw.githubusercontent.com/jtgi/tts/main/completions/tts.zsh" \
+            "$XDG_DATA_HOME/zsh/site-functions" \
+            "_tts"
+    fi
+fi
+
 # Check PATH
 case ":$PATH:" in
     *":$BINDIR:"*)

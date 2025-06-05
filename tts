@@ -3,18 +3,27 @@
 # tts - Text-to-speech CLI using ElevenLabs API
 # Reads text from stdin and outputs audio to stdout
 
-# Default values
 API_KEY="${ELEVENLABS_API_KEY:-}"
-VOICE_ID="${TTS_VOICE_ID:-21m00Tcm4TlvDq8ikWAM}"  # Default to Rachel voice
+VOICE_ID="${TTS_VOICE_ID:-21m00Tcm4TlvDq8ikWAM}"
 MODEL_ID="${TTS_MODEL_ID:-eleven_monolingual_v1}"
 OUTPUT_FORMAT="${TTS_OUTPUT_FORMAT:-mp3_44100_128}"
 API_URL="https://api.elevenlabs.io/v1/text-to-speech"
 DEBUG="${TTS_DEBUG:-}"
-CHUNK_SIZE="${TTS_CHUNK_SIZE:-5000}"  # Characters per chunk for streaming
-PLAY_AUDIO=""  # Play audio directly instead of outputting to stdout
-OPTIMIZE_STREAMING_LATENCY="${TTS_OPTIMIZE_STREAMING_LATENCY:-1}"  # 0-4, higher = lower latency
+CHUNK_SIZE="${TTS_CHUNK_SIZE:-5000}"
+PLAY_AUDIO=""
+OPTIMIZE_STREAMING_LATENCY="${TTS_OPTIMIZE_STREAMING_LATENCY:-1}"
 
-# Parse command line options
+STABILITY="${TTS_STABILITY:-0.5}"
+SIMILARITY_BOOST="${TTS_SIMILARITY_BOOST:-0.75}"
+STYLE="${TTS_STYLE:-0.0}"
+USE_SPEAKER_BOOST="${TTS_USE_SPEAKER_BOOST:-true}"
+
+SEED="${TTS_SEED:-}"
+PREVIOUS_TEXT="${TTS_PREVIOUS_TEXT:-}"
+NEXT_TEXT="${TTS_NEXT_TEXT:-}"
+PREVIOUS_REQUEST_IDS="${TTS_PREVIOUS_REQUEST_IDS:-}"
+NEXT_REQUEST_IDS="${TTS_NEXT_REQUEST_IDS:-}"
+
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -k|--api-key)
@@ -49,6 +58,42 @@ while [ "$#" -gt 0 ]; do
             OPTIMIZE_STREAMING_LATENCY="$2"
             shift 2
             ;;
+        --stability)
+            STABILITY="$2"
+            shift 2
+            ;;
+        --similarity-boost)
+            SIMILARITY_BOOST="$2"
+            shift 2
+            ;;
+        --style)
+            STYLE="$2"
+            shift 2
+            ;;
+        --speaker-boost)
+            USE_SPEAKER_BOOST="$2"
+            shift 2
+            ;;
+        --seed)
+            SEED="$2"
+            shift 2
+            ;;
+        --previous-text)
+            PREVIOUS_TEXT="$2"
+            shift 2
+            ;;
+        --next-text)
+            NEXT_TEXT="$2"
+            shift 2
+            ;;
+        --previous-request-ids)
+            PREVIOUS_REQUEST_IDS="$2"
+            shift 2
+            ;;
+        --next-request-ids)
+            NEXT_REQUEST_IDS="$2"
+            shift 2
+            ;;
         -h|--help)
             cat >&2 <<EOF
 Usage: tts [OPTIONS] < input.txt > output.mp3
@@ -56,15 +101,26 @@ Usage: tts [OPTIONS] < input.txt > output.mp3
 Convert text to speech using ElevenLabs API.
 
 OPTIONS:
-    -k, --api-key KEY      ElevenLabs API key (or set ELEVENLABS_API_KEY)
-    -v, --voice ID         Voice ID (default: 21m00Tcm4TlvDq8ikWAM)
-    -m, --model ID         Model ID (default: eleven_monolingual_v1)
-    -f, --format FORMAT    Output format (default: mp3_44100_128)
-    -c, --chunk-size SIZE  Characters per chunk for streaming (default: 5000)
-    -d, --debug           Enable debug output
-    -p, --play            Play audio directly (macOS only)
-    -l, --latency LEVEL   Optimize streaming latency 0-4 (default: 1)
-    -h, --help            Show this help message
+    -k, --api-key KEY         ElevenLabs API key (or set ELEVENLABS_API_KEY)
+    -v, --voice ID            Voice ID (default: 21m00Tcm4TlvDq8ikWAM)
+    -m, --model ID            Model ID (default: eleven_monolingual_v1)
+    -f, --format FORMAT       Output format (default: mp3_44100_128)
+    -c, --chunk-size SIZE     Characters per chunk for streaming (default: 5000)
+    -d, --debug              Enable debug output
+    -p, --play               Play audio directly (macOS only)
+    -l, --latency LEVEL      Optimize streaming latency 0-4 (default: 1)
+    
+    --stability FLOAT        Voice stability 0.0-1.0 (default: 0.5)
+    --similarity-boost FLOAT Voice similarity boost 0.0-1.0 (default: 0.75)
+    --style FLOAT            Speaking style intensity 0.0-1.0 (default: 0.0)
+    --speaker-boost BOOL     Enable speaker boost true/false (default: true)
+    --seed INTEGER           Seed for reproducible generation
+    --previous-text TEXT     Previous text context for better pronunciation
+    --next-text TEXT         Next text context for better pronunciation
+    --previous-request-ids   Comma-separated previous request IDs
+    --next-request-ids       Comma-separated next request IDs
+    
+    -h, --help               Show this help message
 
 EXAMPLES:
     echo "Hello world" | tts > hello.mp3
@@ -79,6 +135,15 @@ EXAMPLES:
     
     # Debug API issues
     echo "test" | tts -d > test.mp3
+    
+    # Fine-tune voice characteristics
+    echo "Hello" | tts --stability 0.8 --similarity-boost 0.9 > stable.mp3
+    
+    # Enable expressive speaking
+    echo "Wow!" | tts --style 1.0 --speaker-boost true > expressive.mp3
+    
+    # Reproducible generation
+    echo "Hello" | tts --seed 12345 > hello1.mp3
 
 ENVIRONMENT VARIABLES:
     ELEVENLABS_API_KEY              Default API key
@@ -88,6 +153,15 @@ ENVIRONMENT VARIABLES:
     TTS_DEBUG                      Enable debug output (set to 1)
     TTS_CHUNK_SIZE                 Default chunk size for streaming
     TTS_OPTIMIZE_STREAMING_LATENCY Default latency optimization (0-4)
+    TTS_STABILITY                  Default voice stability (0.0-1.0)
+    TTS_SIMILARITY_BOOST           Default similarity boost (0.0-1.0)
+    TTS_STYLE                      Default speaking style (0.0-1.0)
+    TTS_USE_SPEAKER_BOOST          Default speaker boost (true/false)
+    TTS_SEED                       Default seed for reproducible generation
+    TTS_PREVIOUS_TEXT              Default previous text context
+    TTS_NEXT_TEXT                  Default next text context
+    TTS_PREVIOUS_REQUEST_IDS       Default previous request IDs
+    TTS_NEXT_REQUEST_IDS           Default next request IDs
 EOF
             exit 0
             ;;
@@ -98,14 +172,12 @@ EOF
     esac
 done
 
-# Debug function
 debug() {
     if [ -n "$DEBUG" ]; then
         echo "[DEBUG] $*" >&2
     fi
 }
 
-# Check for API key
 if [ -z "$API_KEY" ]; then
     echo "Error: API key required. Set ELEVENLABS_API_KEY or use -k option." >&2
     exit 1
@@ -117,13 +189,18 @@ debug "Model ID: $MODEL_ID"
 debug "Output Format: $OUTPUT_FORMAT"
 debug "Chunk Size: $CHUNK_SIZE"
 debug "Optimize Streaming Latency: $OPTIMIZE_STREAMING_LATENCY"
+debug "Stability: $STABILITY"
+debug "Similarity Boost: $SIMILARITY_BOOST"
+debug "Style: $STYLE"
+debug "Speaker Boost: $USE_SPEAKER_BOOST"
+debug "Seed: $SEED"
+debug "Previous Text: ${PREVIOUS_TEXT:0:50}..."
+debug "Next Text: ${NEXT_TEXT:0:50}..."
 
-# Escape text for JSON
 escape_json() {
     printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g' | tr '\n' ' ' | sed 's/  */ /g'
 }
 
-# Process a single chunk of text
 process_chunk() {
     local text="$1"
     local chunk_num="$2"
@@ -137,16 +214,22 @@ process_chunk() {
     local escaped_text=$(escape_json "$text")
     local temp_file=$(mktemp)
     
-    # Create request body
     cat > "$temp_file" <<EOF
 {
     "text": "$escaped_text",
     "model_id": "$MODEL_ID",
     "voice_settings": {
-        "stability": 0.5,
-        "similarity_boost": 0.75
+        "stability": $STABILITY,
+        "similarity_boost": $SIMILARITY_BOOST,
+        "style": $STYLE,
+        "use_speaker_boost": $USE_SPEAKER_BOOST
     },
-    "output_format": "$OUTPUT_FORMAT"
+    "output_format": "$OUTPUT_FORMAT"$([ -n "$SEED" ] && echo ",
+    \"seed\": $SEED")$([ -n "$PREVIOUS_TEXT" ] && echo ",
+    \"previous_text\": \"$(escape_json "$PREVIOUS_TEXT")\"")$([ -n "$NEXT_TEXT" ] && echo ",
+    \"next_text\": \"$(escape_json "$NEXT_TEXT")\"")$([ -n "$PREVIOUS_REQUEST_IDS" ] && echo ",
+    \"previous_request_ids\": [$(echo "$PREVIOUS_REQUEST_IDS" | sed 's/,/", "/g; s/^/"/; s/$/"/')]")$([ -n "$NEXT_REQUEST_IDS" ] && echo ",
+    \"next_request_ids\": [$(echo "$NEXT_REQUEST_IDS" | sed 's/,/", "/g; s/^/"/; s/$/"/')]")
 }
 EOF
     
@@ -155,11 +238,8 @@ EOF
         cat "$temp_file" >&2
     fi
     
-    # Make API request with streaming support
     if [ -n "$PLAY_AUDIO" ]; then
-        # Stream to file and play when ready
         if command -v afplay >/dev/null 2>&1; then
-            # Download to temp file
             local audio_temp=$(mktemp).mp3
             local headers_file=$(mktemp)
             local http_code=$(curl -w "%{http_code}" -o "$audio_temp" -D "$headers_file" -X POST \
@@ -172,7 +252,6 @@ EOF
             
             local curl_exit=$?
             
-            # Check curl exit code
             if [ $curl_exit -ne 0 ]; then
                 echo "Error: curl failed with exit code $curl_exit" >&2
                 if [ -n "$DEBUG" ] && [ -f "${temp_file}.err" ]; then
@@ -183,9 +262,7 @@ EOF
                 return 1
             fi
             
-            # Check HTTP response
             if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
-                # Play the audio file
                 afplay "$audio_temp"
                 rm -f "$temp_file" "${temp_file}.err" "$audio_temp" "$headers_file"
                 return 0
@@ -200,7 +277,7 @@ EOF
             return 1
         fi
     else
-        # Standard mode: save to file then output
+        # standard mode: save to file then output
         local response_file=$(mktemp)
         local headers_file=$(mktemp)
         local http_code=$(curl -w "%{http_code}" -o "$response_file" -D "$headers_file" -X POST \
@@ -213,7 +290,6 @@ EOF
         
         local curl_exit=$?
         
-        # Check curl exit code
         if [ $curl_exit -ne 0 ]; then
             echo "Error: curl failed with exit code $curl_exit" >&2
             if [ -n "$DEBUG" ] && [ -f "${temp_file}.err" ]; then
@@ -224,17 +300,13 @@ EOF
             return 1
         fi
         
-        # Check HTTP response
         if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
-            # Output the audio data to stdout
             cat "$response_file"
             rm -f "$temp_file" "${temp_file}.err" "$response_file" "$headers_file"
             return 0
         else
-            # Error - show details
             echo "Error: API request failed (HTTP $http_code)" >&2
             
-            # Show response headers for debugging
             if [ -n "$DEBUG" ] && [ -f "$headers_file" ]; then
                 echo "Response headers:" >&2
                 cat "$headers_file" >&2
@@ -250,7 +322,6 @@ EOF
                 cat "${temp_file}.err" >&2
             fi
             
-            # Common error explanations
             case "$http_code" in
                 401)
                     echo "Hint: Authentication failed. Check your API key." >&2
@@ -275,22 +346,18 @@ EOF
     fi
 }
 
-# Read and process input in chunks
 chunk_buffer=""
 chunk_count=0
 total_chars=0
 
-# Process stdin line by line for better streaming
-# Handle both regular lines and lines without final newline
+# read from stdin line by line in chunks
 while IFS= read -r line || [ -n "$line" ]; do
-    # Add line to buffer with space (preserving word boundaries)
     if [ -n "$chunk_buffer" ]; then
         chunk_buffer="$chunk_buffer $line"
     else
         chunk_buffer="$line"
     fi
     
-    # Check if buffer exceeds chunk size
     if [ ${#chunk_buffer} -ge "$CHUNK_SIZE" ]; then
         chunk_count=$((chunk_count + 1))
         total_chars=$((total_chars + ${#chunk_buffer}))
@@ -303,7 +370,6 @@ while IFS= read -r line || [ -n "$line" ]; do
     fi
 done
 
-# Process any remaining text
 if [ -n "$chunk_buffer" ]; then
     chunk_count=$((chunk_count + 1))
     total_chars=$((total_chars + ${#chunk_buffer}))
@@ -313,7 +379,6 @@ if [ -n "$chunk_buffer" ]; then
     fi
 fi
 
-# Check if any text was processed
 if [ $chunk_count -eq 0 ]; then
     echo "Error: No input text provided." >&2
     exit 1

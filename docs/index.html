@@ -100,7 +100,7 @@
 
 <body>
     <h1>TTS(1)</h1>
-    <p>tts - text-to-speech converter using ElevenLabs API</p>
+    <p>tts - text-to-speech converter using ElevenLabs API by <a href="https://x.com/jtgi" target="_blank">jtgi</a></p>
 
     <h2>EXAMPLES</h2>
 
@@ -119,8 +119,40 @@
     <h3>Debug API issues</h3>
     <pre><code>echo "test" | tts -d 2>debug.log</code></pre>
 
+    <h3>Adjust voice characteristics</h3>
+    <pre><code>echo "Hello" | tts --stability 0.8 --similarity-boost 0.9 > stable.mp3</code></pre>
+
+    <h3>Enable expressive speaking style</h3>
+    <pre><code>echo "Wow!" | tts --style 1.0 --speaker-boost true > expressive.mp3</code></pre>
+
+    <h3>Reproducible generation</h3>
+    <pre><code>echo "Hello" | tts --seed 12345 > hello1.mp3
+echo "Hello" | tts --seed 12345 > hello2.mp3  # Identical to hello1.mp3</code></pre>
+
+    <h3>Context-aware pronunciation</h3>
+    <pre><code>echo "Dr. Smith" | tts --previous-text "The doctor will see you now." > context.mp3</code></pre>
+
     <h2>SYNOPSIS</h2>
-    <pre><code>tts [-k KEY] [-v VOICE] [-m MODEL] [-f FORMAT] [-c SIZE] [-d] < input > output.mp3</code></pre>
+    <pre><code>tts [OPTIONS] < input > output.mp3
+
+OPTIONS:
+  -k, --api-key KEY         API key
+  -v, --voice ID            Voice ID
+  -m, --model ID            Model ID  
+  -f, --format FORMAT       Output format
+  -c, --chunk-size SIZE     Chunk size
+  -d, --debug              Debug mode
+  -p, --play               Play directly
+  -l, --latency LEVEL      Latency optimization
+  --stability FLOAT        Voice stability
+  --similarity-boost FLOAT Similarity boost
+  --style FLOAT            Style intensity
+  --speaker-boost BOOL     Speaker boost
+  --seed INTEGER           Reproducible seed
+  --previous-text TEXT     Previous context
+  --next-text TEXT         Next context
+  --previous-request-ids   Previous IDs
+  --next-request-ids       Next IDs</code></pre>
 
     <h2>DESCRIPTION</h2>
     <p>tts reads text from standard input and writes audio to standard output. It uses the ElevenLabs API to convert
@@ -164,6 +196,61 @@ chmod +x ~/.local/bin/tts</code></pre>
     </div>
 
     <div class="option-item">
+        <div class="option-name">-p, --play</div>
+        Play audio directly without saving (macOS only).
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">-l, --latency LEVEL</div>
+        Optimize streaming latency (0-4, higher = lower latency). Default: 1
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">--stability FLOAT</div>
+        Voice stability (0.0-1.0). Higher values make voice more consistent but less expressive. Default: 0.5
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">--similarity-boost FLOAT</div>
+        Voice similarity boost (0.0-1.0). Enhances similarity to the original voice. Default: 0.75
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">--style FLOAT</div>
+        Speaking style intensity (0.0-1.0). Controls how expressive the voice is. Default: 0.0
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">--speaker-boost BOOL</div>
+        Enable speaker boost (true/false). Enhances voice clarity and distinction. Default: true
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">--seed INTEGER</div>
+        Seed for reproducible generation. Use the same seed to get identical audio for the same text.
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">--previous-text TEXT</div>
+        Previous text context for better pronunciation and intonation.
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">--next-text TEXT</div>
+        Next text context for better pronunciation and intonation.
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">--previous-request-ids IDS</div>
+        Comma-separated previous request IDs for context continuity.
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">--next-request-ids IDS</div>
+        Comma-separated next request IDs for context continuity.
+    </div>
+
+    <div class="option-item">
         <div class="option-name">-h, --help</div>
         Display help message and exit.
     </div>
@@ -193,6 +280,46 @@ chmod +x ~/.local/bin/tts</code></pre>
         <tr>
             <td><code>TTS_CHUNK_SIZE</code></td>
             <td>Default chunk size for processing</td>
+        </tr>
+        <tr>
+            <td><code>TTS_OPTIMIZE_STREAMING_LATENCY</code></td>
+            <td>Default latency optimization level (0-4)</td>
+        </tr>
+        <tr>
+            <td><code>TTS_STABILITY</code></td>
+            <td>Default voice stability (0.0-1.0)</td>
+        </tr>
+        <tr>
+            <td><code>TTS_SIMILARITY_BOOST</code></td>
+            <td>Default similarity boost (0.0-1.0)</td>
+        </tr>
+        <tr>
+            <td><code>TTS_STYLE</code></td>
+            <td>Default speaking style intensity (0.0-1.0)</td>
+        </tr>
+        <tr>
+            <td><code>TTS_USE_SPEAKER_BOOST</code></td>
+            <td>Default speaker boost setting (true/false)</td>
+        </tr>
+        <tr>
+            <td><code>TTS_SEED</code></td>
+            <td>Default seed for reproducible generation</td>
+        </tr>
+        <tr>
+            <td><code>TTS_PREVIOUS_TEXT</code></td>
+            <td>Default previous text context</td>
+        </tr>
+        <tr>
+            <td><code>TTS_NEXT_TEXT</code></td>
+            <td>Default next text context</td>
+        </tr>
+        <tr>
+            <td><code>TTS_PREVIOUS_REQUEST_IDS</code></td>
+            <td>Default previous request IDs</td>
+        </tr>
+        <tr>
+            <td><code>TTS_NEXT_REQUEST_IDS</code></td>
+            <td>Default next request IDs</td>
         </tr>
     </table>
 

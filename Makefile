@@ -14,7 +14,9 @@ all:
 	@echo "tts is a shell script, no compilation needed."
 	@echo "Run 'make install' to install."
 
-install:
+install: install-base install-completions
+
+install-base:
 	@echo "Installing tts to $(DESTDIR)$(BINDIR)"
 	@mkdir -p $(DESTDIR)$(BINDIR)
 	@cp -f tts $(DESTDIR)$(BINDIR)/tts
@@ -23,11 +25,10 @@ install:
 	@mkdir -p $(DESTDIR)$(MANDIR)
 	@cp -f man/tts.1 $(DESTDIR)$(MANDIR)/tts.1
 	@chmod 644 $(DESTDIR)$(MANDIR)/tts.1
+
+install-completions: install-bash-completion install-zsh-completion
+	@echo "Shell completions installed."
 	@echo "Installation complete."
-	@echo ""
-	@echo "To install shell completions, run:"
-	@echo "  make install-bash-completion"
-	@echo "  make install-zsh-completion"
 
 install-bash-completion:
 	@echo "Installing bash completion to $(DESTDIR)$(BASHCOMPDIR)"
@@ -41,7 +42,7 @@ install-zsh-completion:
 	@cp -f completions/tts.zsh $(DESTDIR)$(ZSHCOMPDIR)/_tts
 	@chmod 644 $(DESTDIR)$(ZSHCOMPDIR)/_tts
 
-install-all: install install-bash-completion install-zsh-completion
+install-all: install
 
 uninstall:
 	@echo "Removing tts from $(DESTDIR)$(BINDIR)"
