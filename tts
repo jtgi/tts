@@ -100,6 +100,20 @@ Usage: tts [OPTIONS] < input.txt > output.mp3
 
 Convert text to speech using ElevenLabs API.
 
+EXAMPLES:
+    echo "Hello world" | tts > hello.mp3
+    cat book.txt | tts -v EXAVITQu4vr4xnSDxMaL > book.mp3
+    tts < story.txt | mpv -
+    
+    # Play audio directly (macOS)
+    echo "Hello world" | tts --play
+    
+    # Process large files with streaming
+    cat large_book.txt | tts -c 10000 > book.mp3
+    
+    # Debug API issues
+    echo "test" | tts -d > test.mp3
+
 OPTIONS:
     -k, --api-key KEY         ElevenLabs API key (or set ELEVENLABS_API_KEY)
     -v, --voice ID            Voice ID (default: 21m00Tcm4TlvDq8ikWAM)
@@ -121,30 +135,7 @@ OPTIONS:
     --next-request-ids       Comma-separated next request IDs
     
     -h, --help               Show this help message
-
-EXAMPLES:
-    echo "Hello world" | tts > hello.mp3
-    cat book.txt | tts -v EXAVITQu4vr4xnSDxMaL > book.mp3
-    tts < story.txt | mpv -
     
-    # Play audio directly (macOS)
-    echo "Hello world" | tts --play
-    
-    # Process large files with streaming
-    cat large_book.txt | tts -c 10000 > book.mp3
-    
-    # Debug API issues
-    echo "test" | tts -d > test.mp3
-    
-    # Fine-tune voice characteristics
-    echo "Hello" | tts --stability 0.8 --similarity-boost 0.9 > stable.mp3
-    
-    # Enable expressive speaking
-    echo "Wow!" | tts --style 1.0 --speaker-boost true > expressive.mp3
-    
-    # Reproducible generation
-    echo "Hello" | tts --seed 12345 > hello1.mp3
-
 ENVIRONMENT VARIABLES:
     ELEVENLABS_API_KEY              Default API key
     TTS_VOICE_ID                   Default voice ID
