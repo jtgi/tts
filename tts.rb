@@ -7,6 +7,9 @@ class Tts < Formula
 
   def install
     bin.install "tts"
+    man1.install "man/tts.1"
+    bash_completion.install "completions/tts.bash" => "tts"
+    zsh_completion.install "completions/tts.zsh" => "_tts"
   end
 
   def caveats
