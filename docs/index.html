@@ -63,6 +63,7 @@
             margin: 1rem 0;
             padding-left: 2rem;
             overflow-x: auto;
+            position: relative;
         }
 
         pre code {
@@ -102,6 +103,9 @@
     <h1>TTS(1)</h1>
     <p>tts - text-to-speech converter using ElevenLabs API by <a href="https://x.com/jtgi" target="_blank">jtgi</a></p>
 
+    <h2>INSTALLATION</h2>
+    <pre><code>curl -fsSL https://raw.githubusercontent.com/jtgi/tts/main/install.sh | sh</code></pre>
+
     <h2>EXAMPLES</h2>
 
     <h3>Convert simple text to speech</h3>
@@ -110,8 +114,8 @@
     <h3>Process a large book with custom chunk size</h3>
     <pre><code>cat book.txt | tts -c 10000 > book.mp3</code></pre>
 
-    <h3>Play audio directly without saving</h3>
-    <pre><code>echo "Hello" | tts | mpv -</code></pre>
+    <h3>Play audio directly (macOS only)</h3>
+    <pre><code>echo "Hello" | tts --play</code></pre>
 
     <h3>Extract and convert chapter headings</h3>
     <pre><code>grep "^Chapter" book.txt | tts -v EXAVITQu4vr4xnSDxMaL > chapters.mp3</code></pre>
@@ -141,12 +145,6 @@ OPTIONS:
     <h2>DESCRIPTION</h2>
     <p>tts reads text from standard input and writes audio to standard output. It uses the ElevenLabs API to convert
         text to speech, processing input in chunks for streaming large files.</p>
-
-    <h2>INSTALLATION</h2>
-    <pre><code>curl -fsSL https://raw.githubusercontent.com/jtgi/tts/main/install.sh | sh</code></pre>
-    <p>Or install manually:</p>
-    <pre><code>curl -fsSL https://raw.githubusercontent.com/jtgi/tts/main/tts -o ~/.local/bin/tts
-chmod +x ~/.local/bin/tts</code></pre>
 
     <h2>OPTIONS</h2>
     <div class="option-item">
