@@ -5,80 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tts - text-to-speech converter</title>
     <style>
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #24292e;
-            --code-bg: #f6f8fa;
-            --border-color: #e1e4e8;
-            --link-color: #0366d6;
-            --code-color: #e36209;
-            --string-color: #032f62;
-            --comment-color: #6a737d;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #0d1117;
-                --text-color: #c9d1d9;
-                --code-bg: #161b22;
-                --border-color: #30363d;
-                --link-color: #58a6ff;
-                --code-color: #ff7b72;
-                --string-color: #a5d6ff;
-                --comment-color: #8b949e;
-            }
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
             line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--bg-color);
+            color: #000;
+            background-color: #fff;
             margin: 0;
-            padding: 0;
+            padding: 2rem;
+            max-width: 72ch;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
+        h1, h2, h3 {
+            font-weight: bold;
+            margin: 1.5rem 0 0.5rem 0;
         }
 
         h1 {
-            font-size: 2.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            margin-top: 0;
         }
 
         h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-top: 2.5rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.3rem;
-            border-bottom: 1px solid var(--border-color);
+            font-size: 1rem;
+            text-transform: uppercase;
+            margin-top: 2rem;
         }
 
         h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            font-weight: normal;
+            font-style: italic;
         }
 
-        .tagline {
-            font-size: 1.25rem;
-            color: var(--comment-color);
-            margin-bottom: 2rem;
+        p {
+            margin: 0.5rem 0;
         }
 
         a {
-            color: var(--link-color);
+            color: #2563eb;
             text-decoration: none;
         }
 
@@ -87,359 +52,222 @@
         }
 
         code {
-            font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            font-family: Consolas, Monaco, "Courier New", monospace;
             font-size: 0.875em;
-            padding: 0.2em 0.4em;
-            background-color: var(--code-bg);
-            border-radius: 3px;
-            color: var(--code-color);
         }
 
         pre {
-            background-color: var(--code-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 1rem;
-            overflow-x: auto;
             margin: 1rem 0;
-            position: relative;
+            padding-left: 2rem;
+            overflow-x: auto;
         }
 
         pre code {
-            background-color: transparent;
-            padding: 0;
-            color: var(--text-color);
             font-size: 0.875rem;
-            line-height: 1.5;
-        }
-
-        .install-box {
-            background-color: var(--code-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            position: relative;
-        }
-
-        .install-box h3 {
-            margin-top: 0;
-            margin-bottom: 1rem;
-        }
-
-        .copy-button {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.875rem;
-            cursor: pointer;
-            color: var(--text-color);
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .copy-button:hover {
-            background-color: var(--code-bg);
-        }
-
-        .copy-button:active {
-            transform: scale(0.95);
-        }
-
-        .copy-button.copied {
-            color: #28a745;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 1rem 0;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 0.5rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            font-weight: 600;
-            background-color: var(--code-bg);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .option-name {
-            font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
-            font-weight: 600;
-            color: var(--code-color);
-        }
-
-        .option-description {
-            margin-top: 0.25rem;
         }
 
         .option-item {
-            margin-bottom: 1.5rem;
+            margin: 1rem 0;
+            padding-left: 2rem;
         }
 
-        footer {
-            margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            text-align: center;
-            color: var(--comment-color);
+        .option-name {
+            font-weight: bold;
+            margin-left: -2rem;
         }
 
-        /* Syntax highlighting */
-        .comment { color: var(--comment-color); }
-        .string { color: var(--string-color); }
-        .keyword { color: var(--code-color); }
-        .function { color: var(--link-color); }
+        table {
+            margin: 1rem 0;
+            border-collapse: collapse;
+        }
 
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .container {
-                padding: 1rem;
-            }
+        td {
+            padding: 0.25rem 2rem 0.25rem 0;
+            vertical-align: top;
+        }
 
-            pre {
-                font-size: 0.8rem;
-            }
-
-            table {
-                font-size: 0.875rem;
-            }
-
-            th, td {
-                padding: 0.375rem 0.5rem;
-            }
+        .credit {
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ccc;
+            font-size: 0.875rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>tts</h1>
-        <p class="tagline">text-to-speech converter using ElevenLabs API</p>
+    <h1>TTS(1)</h1>
+    <p>tts - text-to-speech converter using ElevenLabs API</p>
 
-        <div class="install-box">
-            <h3>Installation</h3>
-            <button class="copy-button" onclick="copyInstall()">Copy</button>
-            <pre><code id="install-cmd">curl -fsSL https://github.com/jtgi/tts/raw/main/install.sh | sh</code></pre>
-            <p>Or install manually:</p>
-            <pre><code>curl -fsSL https://github.com/jtgi/tts/raw/main/tts -o ~/.local/bin/tts
+    <h2>EXAMPLES</h2>
+    
+    <h3>Convert simple text to speech</h3>
+    <pre><code>echo "Hello world" | tts > hello.mp3</code></pre>
+
+    <h3>Process a large book with custom chunk size</h3>
+    <pre><code>cat book.txt | tts -c 10000 > book.mp3</code></pre>
+
+    <h3>Play audio directly without saving</h3>
+    <pre><code>echo "Hello" | tts | mpv -</code></pre>
+
+    <h3>Extract and convert chapter headings</h3>
+    <pre><code>grep "^Chapter" book.txt | tts -v EXAVITQu4vr4xnSDxMaL > chapters.mp3</code></pre>
+
+    <h3>Debug API issues</h3>
+    <pre><code>echo "test" | tts -d 2>debug.log</code></pre>
+
+    <h2>SYNOPSIS</h2>
+    <pre><code>tts [-k KEY] [-v VOICE] [-m MODEL] [-f FORMAT] [-c SIZE] [-d] < input > output.mp3</code></pre>
+
+    <h2>DESCRIPTION</h2>
+    <p>tts reads text from standard input and writes audio to standard output. It uses the ElevenLabs API to convert text to speech, processing input in chunks for streaming large files.</p>
+
+    <h2>INSTALLATION</h2>
+    <pre><code>curl -fsSL https://github.com/jtgi/tts/raw/main/install.sh | sh</code></pre>
+    <p>Or install manually:</p>
+    <pre><code>curl -fsSL https://github.com/jtgi/tts/raw/main/tts -o ~/.local/bin/tts
 chmod +x ~/.local/bin/tts</code></pre>
-        </div>
 
-        <h2>Synopsis</h2>
-        <pre><code><span class="function">tts</span> [<span class="keyword">-k</span> <span class="string">KEY</span>] [<span class="keyword">-v</span> <span class="string">VOICE</span>] [<span class="keyword">-m</span> <span class="string">MODEL</span>] [<span class="keyword">-f</span> <span class="string">FORMAT</span>] [<span class="keyword">-c</span> <span class="string">SIZE</span>] [<span class="keyword">-d</span>] &lt; input &gt; output.mp3</code></pre>
-
-        <h2>Description</h2>
-        <p><strong>tts</strong> reads text from standard input and writes audio to standard output. It uses the ElevenLabs API to convert text to speech, processing input in chunks for streaming large files.</p>
-
-        <h2>Options</h2>
-        <div class="option-item">
-            <div class="option-name">-k, --api-key KEY</div>
-            <div class="option-description">ElevenLabs API key. If not specified, uses the ELEVENLABS_API_KEY environment variable.</div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-name">-v, --voice ID</div>
-            <div class="option-description">Voice ID to use for speech synthesis.<br>Default: 21m00Tcm4TlvDq8ikWAM (Rachel)</div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-name">-m, --model ID</div>
-            <div class="option-description">Model ID to use for speech synthesis.<br>Default: eleven_monolingual_v1</div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-name">-f, --format FORMAT</div>
-            <div class="option-description">Output audio format.<br>Default: mp3_44100_128</div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-name">-c, --chunk-size SIZE</div>
-            <div class="option-description">Number of characters to process per chunk. Useful for large files.<br>Default: 5000</div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-name">-d, --debug</div>
-            <div class="option-description">Enable debug output to stderr. Shows API requests, responses, and detailed error information.</div>
-        </div>
-
-        <div class="option-item">
-            <div class="option-name">-h, --help</div>
-            <div class="option-description">Display help message and exit.</div>
-        </div>
-
-        <h2>Environment Variables</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Variable</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>ELEVENLABS_API_KEY</code></td>
-                    <td>Default API key for ElevenLabs service</td>
-                </tr>
-                <tr>
-                    <td><code>TTS_VOICE_ID</code></td>
-                    <td>Default voice ID</td>
-                </tr>
-                <tr>
-                    <td><code>TTS_MODEL_ID</code></td>
-                    <td>Default model ID</td>
-                </tr>
-                <tr>
-                    <td><code>TTS_OUTPUT_FORMAT</code></td>
-                    <td>Default output format</td>
-                </tr>
-                <tr>
-                    <td><code>TTS_DEBUG</code></td>
-                    <td>Set to 1 to enable debug mode by default</td>
-                </tr>
-                <tr>
-                    <td><code>TTS_CHUNK_SIZE</code></td>
-                    <td>Default chunk size for processing</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h2>Examples</h2>
-        
-        <h3>Convert simple text to speech</h3>
-        <pre><code><span class="function">echo</span> <span class="string">"Hello world"</span> | <span class="function">tts</span> &gt; hello.mp3</code></pre>
-
-        <h3>Process a large book with custom chunk size</h3>
-        <pre><code><span class="function">cat</span> book.txt | <span class="function">tts</span> <span class="keyword">-c</span> <span class="string">10000</span> &gt; book.mp3</code></pre>
-
-        <h3>Play audio directly without saving</h3>
-        <pre><code><span class="function">echo</span> <span class="string">"Hello"</span> | <span class="function">tts</span> | <span class="function">mpv</span> -</code></pre>
-
-        <h3>Extract and convert chapter headings</h3>
-        <pre><code><span class="function">grep</span> <span class="string">"^Chapter"</span> book.txt | <span class="function">tts</span> <span class="keyword">-v</span> <span class="string">EXAVITQu4vr4xnSDxMaL</span> &gt; chapters.mp3</code></pre>
-
-        <h3>Debug API issues</h3>
-        <pre><code><span class="function">echo</span> <span class="string">"test"</span> | <span class="function">tts</span> <span class="keyword">-d</span> 2&gt;debug.log</code></pre>
-
-        <h2>Available Voices</h2>
-        <p>Common voice IDs include:</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Voice ID</th>
-                    <th>Name</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>21m00Tcm4TlvDq8ikWAM</code></td>
-                    <td>Rachel (default)</td>
-                </tr>
-                <tr>
-                    <td><code>EXAVITQu4vr4xnSDxMaL</code></td>
-                    <td>Bella</td>
-                </tr>
-                <tr>
-                    <td><code>ErXwobaYiN019PkySvjV</code></td>
-                    <td>Antoni</td>
-                </tr>
-                <tr>
-                    <td><code>MF3mGyEYCl7XYWbV9V6O</code></td>
-                    <td>Elli</td>
-                </tr>
-                <tr>
-                    <td><code>TxGEqnHWrfWFTfGW9XjX</code></td>
-                    <td>Josh</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h2>Available Formats</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Format</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>mp3_44100_128</code></td>
-                    <td>MP3 128kbps (default)</td>
-                </tr>
-                <tr>
-                    <td><code>mp3_44100_192</code></td>
-                    <td>MP3 192kbps</td>
-                </tr>
-                <tr>
-                    <td><code>pcm_16000</code></td>
-                    <td>PCM 16kHz</td>
-                </tr>
-                <tr>
-                    <td><code>pcm_22050</code></td>
-                    <td>PCM 22kHz</td>
-                </tr>
-                <tr>
-                    <td><code>pcm_24000</code></td>
-                    <td>PCM 24kHz</td>
-                </tr>
-                <tr>
-                    <td><code>pcm_44100</code></td>
-                    <td>PCM 44.1kHz</td>
-                </tr>
-                <tr>
-                    <td><code>ulaw_8000</code></td>
-                    <td>μ-law 8kHz</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h2>Exit Status</h2>
-        <ul>
-            <li><strong>0</strong> - Success</li>
-            <li><strong>1</strong> - Error occurred (API failure, missing input, authentication error, etc.)</li>
-        </ul>
-
-        <h2>Notes</h2>
-        <p>Requires <code>curl(1)</code> to be installed.</p>
-        <p>The tool processes text in chunks to handle large files efficiently, making it suitable for converting entire books or long documents.</p>
-        <p>API errors are reported with HTTP status codes and helpful hints for common issues like authentication failures or rate limiting.</p>
-
-        <h2>See Also</h2>
-        <p><code>curl(1)</code>, <code>mpv(1)</code>, <code>ffmpeg(1)</code></p>
-
-        <footer>
-            <p>made by <a href="https://github.com/jtgi/tts">jtgi</a></p>
-        </footer>
+    <h2>OPTIONS</h2>
+    <div class="option-item">
+        <div class="option-name">-k, --api-key KEY</div>
+        ElevenLabs API key. If not specified, uses the ELEVENLABS_API_KEY environment variable.
     </div>
 
-    <script>
-        function copyInstall() {
-            const cmd = document.getElementById('install-cmd').textContent;
-            navigator.clipboard.writeText(cmd).then(() => {
-                const button = document.querySelector('.copy-button');
-                button.textContent = 'Copied!';
-                button.classList.add('copied');
-                setTimeout(() => {
-                    button.textContent = 'Copy';
-                    button.classList.remove('copied');
-                }, 2000);
-            });
-        }
-    </script>
+    <div class="option-item">
+        <div class="option-name">-v, --voice ID</div>
+        Voice ID to use for speech synthesis. Default: 21m00Tcm4TlvDq8ikWAM (Rachel)
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">-m, --model ID</div>
+        Model ID to use for speech synthesis. Default: eleven_monolingual_v1
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">-f, --format FORMAT</div>
+        Output audio format. Default: mp3_44100_128
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">-c, --chunk-size SIZE</div>
+        Number of characters to process per chunk. Useful for large files. Default: 5000
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">-d, --debug</div>
+        Enable debug output to stderr. Shows API requests, responses, and detailed error information.
+    </div>
+
+    <div class="option-item">
+        <div class="option-name">-h, --help</div>
+        Display help message and exit.
+    </div>
+
+    <h2>ENVIRONMENT</h2>
+    <table>
+        <tr>
+            <td><code>ELEVENLABS_API_KEY</code></td>
+            <td>Default API key for ElevenLabs service</td>
+        </tr>
+        <tr>
+            <td><code>TTS_VOICE_ID</code></td>
+            <td>Default voice ID</td>
+        </tr>
+        <tr>
+            <td><code>TTS_MODEL_ID</code></td>
+            <td>Default model ID</td>
+        </tr>
+        <tr>
+            <td><code>TTS_OUTPUT_FORMAT</code></td>
+            <td>Default output format</td>
+        </tr>
+        <tr>
+            <td><code>TTS_DEBUG</code></td>
+            <td>Set to 1 to enable debug mode by default</td>
+        </tr>
+        <tr>
+            <td><code>TTS_CHUNK_SIZE</code></td>
+            <td>Default chunk size for processing</td>
+        </tr>
+    </table>
+
+    <h2>VOICES</h2>
+    <p>Common voice IDs include:</p>
+    <table>
+        <tr>
+            <td><code>21m00Tcm4TlvDq8ikWAM</code></td>
+            <td>Rachel (default)</td>
+        </tr>
+        <tr>
+            <td><code>EXAVITQu4vr4xnSDxMaL</code></td>
+            <td>Bella</td>
+        </tr>
+        <tr>
+            <td><code>ErXwobaYiN019PkySvjV</code></td>
+            <td>Antoni</td>
+        </tr>
+        <tr>
+            <td><code>MF3mGyEYCl7XYWbV9V6O</code></td>
+            <td>Elli</td>
+        </tr>
+        <tr>
+            <td><code>TxGEqnHWrfWFTfGW9XjX</code></td>
+            <td>Josh</td>
+        </tr>
+    </table>
+
+    <h2>FORMATS</h2>
+    <table>
+        <tr>
+            <td><code>mp3_44100_128</code></td>
+            <td>MP3 128kbps (default)</td>
+        </tr>
+        <tr>
+            <td><code>mp3_44100_192</code></td>
+            <td>MP3 192kbps</td>
+        </tr>
+        <tr>
+            <td><code>pcm_16000</code></td>
+            <td>PCM 16kHz</td>
+        </tr>
+        <tr>
+            <td><code>pcm_22050</code></td>
+            <td>PCM 22kHz</td>
+        </tr>
+        <tr>
+            <td><code>pcm_24000</code></td>
+            <td>PCM 24kHz</td>
+        </tr>
+        <tr>
+            <td><code>pcm_44100</code></td>
+            <td>PCM 44.1kHz</td>
+        </tr>
+        <tr>
+            <td><code>ulaw_8000</code></td>
+            <td>μ-law 8kHz</td>
+        </tr>
+    </table>
+
+    <h2>EXIT STATUS</h2>
+    <div class="option-item">
+        <div class="option-name">0</div>
+        Success
+    </div>
+    <div class="option-item">
+        <div class="option-name">1</div>
+        Error occurred (API failure, missing input, authentication error, etc.)
+    </div>
+
+    <h2>NOTES</h2>
+    <p>Requires curl(1) to be installed.</p>
+    <p>The tool processes text in chunks to handle large files efficiently, making it suitable for converting entire books or long documents.</p>
+    <p>API errors are reported with HTTP status codes and helpful hints for common issues like authentication failures or rate limiting.</p>
+
+    <h2>SEE ALSO</h2>
+    <p>curl(1), mpv(1), ffmpeg(1)</p>
+
+    <div class="credit">
+        <p>made by <a href="https://github.com/jtgi">jtgi</a></p>
+    </div>
 </body>
 </html>
