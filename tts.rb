@@ -17,7 +17,6 @@ class Tts < Formula
       Usage:
         echo "Hello world" | tts > hello.mp3
         cat book.txt | tts -v EXAVITQu4vr4xnSDxMaL > book.mp3
-        tts < story.txt | mpv -
     EOS
   end
 
