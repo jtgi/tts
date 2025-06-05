@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,9 @@
             max-width: 72ch;
         }
 
-        h1, h2, h3 {
+        h1,
+        h2,
+        h3 {
             font-weight: bold;
             margin: 1.5rem 0 0.5rem 0;
         }
@@ -94,12 +97,13 @@
         }
     </style>
 </head>
+
 <body>
     <h1>TTS(1)</h1>
     <p>tts - text-to-speech converter using ElevenLabs API</p>
 
     <h2>EXAMPLES</h2>
-    
+
     <h3>Convert simple text to speech</h3>
     <pre><code>echo "Hello world" | tts > hello.mp3</code></pre>
 
@@ -119,12 +123,13 @@
     <pre><code>tts [-k KEY] [-v VOICE] [-m MODEL] [-f FORMAT] [-c SIZE] [-d] < input > output.mp3</code></pre>
 
     <h2>DESCRIPTION</h2>
-    <p>tts reads text from standard input and writes audio to standard output. It uses the ElevenLabs API to convert text to speech, processing input in chunks for streaming large files.</p>
+    <p>tts reads text from standard input and writes audio to standard output. It uses the ElevenLabs API to convert
+        text to speech, processing input in chunks for streaming large files.</p>
 
     <h2>INSTALLATION</h2>
-    <pre><code>curl -fsSL https://github.com/jtgi/tts/raw/main/install.sh | sh</code></pre>
+    <pre><code>curl -fsSL https://raw.githubusercontent.com/jtgi/tts/main/install.sh | sh</code></pre>
     <p>Or install manually:</p>
-    <pre><code>curl -fsSL https://github.com/jtgi/tts/raw/main/tts -o ~/.local/bin/tts
+    <pre><code>curl -fsSL https://raw.githubusercontent.com/jtgi/tts/main/tts -o ~/.local/bin/tts
 chmod +x ~/.local/bin/tts</code></pre>
 
     <h2>OPTIONS</h2>
@@ -260,14 +265,18 @@ chmod +x ~/.local/bin/tts</code></pre>
 
     <h2>NOTES</h2>
     <p>Requires curl(1) to be installed.</p>
-    <p>The tool processes text in chunks to handle large files efficiently, making it suitable for converting entire books or long documents.</p>
-    <p>API errors are reported with HTTP status codes and helpful hints for common issues like authentication failures or rate limiting.</p>
+    <p>The tool processes text in chunks to handle large files efficiently, making it suitable for converting entire
+        books or long documents.</p>
+    <p>API errors are reported with HTTP status codes and helpful hints for common issues like authentication failures
+        or rate limiting.</p>
 
     <h2>SEE ALSO</h2>
     <p>curl(1), mpv(1), ffmpeg(1)</p>
 
     <div class="credit">
-        <p>made by <a href="https://github.com/jtgi">jtgi</a></p>
+        <p><a href="https://github.com/jtgi/tts">open source</a> - made by <a href="https://github.com/jtgi">jtgi</a>
+        </p>
     </div>
 </body>
+
 </html>

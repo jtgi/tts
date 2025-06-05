@@ -45,7 +45,7 @@ mkdir -p "$BINDIR" || error "Failed to create $BINDIR"
 
 # Download tts
 info "Downloading tts..."
-curl -fsSL "https://raw.githubusercontent.com/yourusername/tts/main/tts" -o "$BINDIR/tts" || \
+curl -fsSL "https://raw.githubusercontent.com/jtgi/tts/main/tts" -o "$BINDIR/tts" || \
     error "Failed to download tts"
 
 chmod +x "$BINDIR/tts" || error "Failed to make tts executable"
