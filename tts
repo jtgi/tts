@@ -291,7 +291,17 @@ EOF
         fi
         
         if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
-            cat "$response_file"
+            # Check if stdout is a terminal
+            if [ -t 1 ]; then
+                echo "Warning: Binary output suppressed when writing to terminal." >&2
+                echo "Use redirection to save the audio file:" >&2
+                echo "  tts > output.mp3" >&2
+                echo "Or use --play to play directly." >&2
+                rm -f "$temp_file" "${temp_file}.err" "$response_file" "$headers_file"
+                return 1
+            else
+                cat "$response_file"
+            fi
             rm -f "$temp_file" "${temp_file}.err" "$response_file" "$headers_file"
             return 0
         else
