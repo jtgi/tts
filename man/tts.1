@@ -80,13 +80,6 @@ Process a large book with custom chunk size:
 .nf
 cat book.txt | tts -c 10000 > book.mp3
 .fi
-.PP
-Play audio directly without saving:
-.PP
-.nf
-echo "Hello" | tts | mpv -
-.fi
-.PP
 Extract and convert chapter headings:
 .PP
 .nf
@@ -136,7 +129,6 @@ common issues like authentication failures or rate limiting.
 Future location for configuration file (not yet implemented).
 .SH SEE ALSO
 .BR curl (1),
-.BR mpv (1),
 .BR ffmpeg (1)
 .SH BUGS
 Report bugs at: https://github.com/yourusername/tts

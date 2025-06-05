@@ -103,13 +103,12 @@ Convert text to speech using ElevenLabs API.
 EXAMPLES:
     echo "Hello world" | tts > hello.mp3
     cat book.txt | tts -v EXAVITQu4vr4xnSDxMaL > book.mp3
-    tts < story.txt | mpv -
     
     # Play audio directly (macOS)
     echo "Hello world" | tts --play
     
     # Process large files with streaming
-    cat large_book.txt | tts -c 10000 > book.mp3
+    cat large_book.txt | tts > book.mp3
     
     # Debug API issues
     echo "test" | tts -d > test.mp3

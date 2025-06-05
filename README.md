@@ -20,8 +20,8 @@ make install
 
 ```sh
 echo "Hello world" | tts > hello.mp3
-cat book.txt | tts -c 10000 > book.mp3
-tts < story.txt | mpv -
+cat book.txt | tts > book.mp3
+cat "Chapter" | tts > book_index.mp3
 
 # Play audio directly (macOS)
 echo "Hello world" | tts --play
@@ -44,6 +44,7 @@ echo "Hello" | tts -k "your-api-key" > hello.mp3
 ## Options
 
 ### Basic Options
+
 - `-k, --api-key` - ElevenLabs API key
 - `-v, --voice` - Voice ID (default: Rachel)
 - `-m, --model` - Model ID (default: eleven_monolingual_v1)
@@ -54,12 +55,14 @@ echo "Hello" | tts -k "your-api-key" > hello.mp3
 - `-l, --latency` - Optimize streaming latency 0-4 (default: 1)
 
 ### Voice Control Options
+
 - `--stability` - Voice stability 0.0-1.0 (default: 0.5)
 - `--similarity-boost` - Voice similarity boost 0.0-1.0 (default: 0.75)
 - `--style` - Speaking style intensity 0.0-1.0 (default: 0.0)
 - `--speaker-boost` - Enable speaker boost true/false (default: true)
 
 ### Advanced Options
+
 - `--seed` - Seed for reproducible generation
 - `--previous-text` - Previous text context for better pronunciation
 - `--next-text` - Next text context for better pronunciation
@@ -67,6 +70,7 @@ echo "Hello" | tts -k "your-api-key" > hello.mp3
 - `--next-request-ids` - Comma-separated next request IDs
 
 ### Help
+
 - `-h, --help` - Show help
 
 ## Examples
