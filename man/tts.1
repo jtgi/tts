@@ -1,0 +1,144 @@
+.TH TTS 1 "January 2025" "tts 1.0" "User Commands"
+.SH NAME
+tts \- text-to-speech converter using ElevenLabs API
+.SH SYNOPSIS
+.B tts
+[\fB\-k\fR \fIKEY\fR]
+[\fB\-v\fR \fIVOICE\fR]
+[\fB\-m\fR \fIMODEL\fR]
+[\fB\-f\fR \fIFORMAT\fR]
+[\fB\-c\fR \fISIZE\fR]
+[\fB\-d\fR]
+< \fIinput\fR > \fIoutput.mp3\fR
+.SH DESCRIPTION
+.B tts
+reads text from standard input and writes audio to standard output.
+It uses the ElevenLabs API to convert text to speech, processing input
+in chunks for streaming large files.
+.SH OPTIONS
+.TP
+.BR \-k ", " \-\-api\-key " " \fIKEY\fR
+ElevenLabs API key. If not specified, uses the ELEVENLABS_API_KEY
+environment variable.
+.TP
+.BR \-v ", " \-\-voice " " \fIID\fR
+Voice ID to use for speech synthesis.
+Default: 21m00Tcm4TlvDq8ikWAM (Rachel)
+.TP
+.BR \-m ", " \-\-model " " \fIID\fR
+Model ID to use for speech synthesis.
+Default: eleven_monolingual_v1
+.TP
+.BR \-f ", " \-\-format " " \fIFORMAT\fR
+Output audio format.
+Default: mp3_44100_128
+.TP
+.BR \-c ", " \-\-chunk\-size " " \fISIZE\fR
+Number of characters to process per chunk. Useful for large files.
+Default: 5000
+.TP
+.BR \-d ", " \-\-debug
+Enable debug output to stderr. Shows API requests, responses, and detailed error information.
+.TP
+.BR \-h ", " \-\-help
+Display help message and exit.
+.SH ENVIRONMENT
+.TP
+.B ELEVENLABS_API_KEY
+Default API key for ElevenLabs service.
+.TP
+.B TTS_VOICE_ID
+Default voice ID.
+.TP
+.B TTS_MODEL_ID
+Default model ID.
+.TP
+.B TTS_OUTPUT_FORMAT
+Default output format.
+.TP
+.B TTS_DEBUG
+Set to 1 to enable debug mode by default.
+.TP
+.B TTS_CHUNK_SIZE
+Default chunk size for processing.
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 1
+Error occurred (API failure, missing input, authentication error, etc.)
+.SH EXAMPLES
+Convert a simple text to speech:
+.PP
+.nf
+echo "Hello world" | tts > hello.mp3
+.fi
+.PP
+Process a large book with custom chunk size:
+.PP
+.nf
+cat book.txt | tts -c 10000 > book.mp3
+.fi
+.PP
+Play audio directly without saving:
+.PP
+.nf
+echo "Hello" | tts | mpv -
+.fi
+.PP
+Extract and convert chapter headings:
+.PP
+.nf
+grep "^Chapter" book.txt | tts -v EXAVITQu4vr4xnSDxMaL > chapters.mp3
+.fi
+.PP
+Debug API issues:
+.PP
+.nf
+echo "test" | tts -d 2>debug.log
+.fi
+.SH AVAILABLE VOICES
+Common voice IDs include:
+.PP
+.TS
+l l.
+21m00Tcm4TlvDq8ikWAM	Rachel (default)
+EXAVITQu4vr4xnSDxMaL	Bella
+ErXwobaYiN019PkySvjV	Antoni
+MF3mGyEYCl7XYWbV9V6O	Elli
+TxGEqnHWrfWFTfGW9XjX	Josh
+.TE
+.SH AVAILABLE FORMATS
+.TS
+l l.
+mp3_44100_128	MP3 128kbps (default)
+mp3_44100_192	MP3 192kbps
+pcm_16000	PCM 16kHz
+pcm_22050	PCM 22kHz
+pcm_24000	PCM 24kHz
+pcm_44100	PCM 44.1kHz
+ulaw_8000	μ-law 8kHz
+.TE
+.SH NOTES
+Requires
+.BR curl (1)
+to be installed.
+.PP
+The tool processes text in chunks to handle large files efficiently,
+making it suitable for converting entire books or long documents.
+.PP
+API errors are reported with HTTP status codes and helpful hints for
+common issues like authentication failures or rate limiting.
+.SH FILES
+.TP
+.I ~/.config/tts/config
+Future location for configuration file (not yet implemented).
+.SH SEE ALSO
+.BR curl (1),
+.BR mpv (1),
+.BR ffmpeg (1)
+.SH BUGS
+Report bugs at: https://github.com/yourusername/tts
+.SH AUTHOR
+Written by the tts contributors.

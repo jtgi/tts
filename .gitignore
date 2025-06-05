@@ -1,0 +1,17 @@
+# Test files
+*.mp3
+*.wav
+*.pcm
+
+# Temporary files
+*.tmp
+debug.log
+
+# Distribution files
+*.tar.gz
+tts-*/
+
+# Example files
+example.txt
+test.mp3
+hello.mp3
