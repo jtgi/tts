@@ -116,22 +116,6 @@
     <h3>Extract and convert chapter headings</h3>
     <pre><code>grep "^Chapter" book.txt | tts -v EXAVITQu4vr4xnSDxMaL > chapters.mp3</code></pre>
 
-    <h3>Debug API issues</h3>
-    <pre><code>echo "test" | tts -d 2>debug.log</code></pre>
-
-    <h3>Adjust voice characteristics</h3>
-    <pre><code>echo "Hello" | tts --stability 0.8 --similarity-boost 0.9 > stable.mp3</code></pre>
-
-    <h3>Enable expressive speaking style</h3>
-    <pre><code>echo "Wow!" | tts --style 1.0 --speaker-boost true > expressive.mp3</code></pre>
-
-    <h3>Reproducible generation</h3>
-    <pre><code>echo "Hello" | tts --seed 12345 > hello1.mp3
-echo "Hello" | tts --seed 12345 > hello2.mp3  # Identical to hello1.mp3</code></pre>
-
-    <h3>Context-aware pronunciation</h3>
-    <pre><code>echo "Dr. Smith" | tts --previous-text "The doctor will see you now." > context.mp3</code></pre>
-
     <h2>SYNOPSIS</h2>
     <pre><code>tts [OPTIONS] < input > output.mp3
 
