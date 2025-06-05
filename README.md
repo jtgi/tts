@@ -4,16 +4,16 @@ Text-to-speech CLI using ElevenLabs API. Converts text from stdin to audio on st
 
 ## Installation
 
+### Quick install
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/jtgi/tts/main/install.sh | sh
+```
+
 ### From source
 
 ```sh
 make install
-```
-
-### Quick install
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/yourusername/tts/main/install.sh | sh
 ```
 
 ## Usage
@@ -22,6 +22,9 @@ curl -fsSL https://raw.githubusercontent.com/yourusername/tts/main/install.sh | 
 echo "Hello world" | tts > hello.mp3
 cat book.txt | tts -c 10000 > book.mp3
 tts < story.txt | mpv -
+
+# Play audio directly (macOS)
+echo "Hello world" | tts --play
 ```
 
 ## Configuration
@@ -46,6 +49,7 @@ echo "Hello" | tts -k "your-api-key" > hello.mp3
 - `-f, --format` - Output format (default: mp3_44100_128)
 - `-c, --chunk-size` - Characters per chunk (default: 5000)
 - `-d, --debug` - Enable debug output
+- `-p, --play` - Play audio directly (macOS only)
 - `-h, --help` - Show help
 
 ## Examples
@@ -62,6 +66,9 @@ grep "^Chapter" book.txt | tts > chapters.mp3
 
 # Different voice
 echo "Hello" | tts -v EXAVITQu4vr4xnSDxMaL > hello.mp3
+
+# Play directly on macOS
+echo "Hello world" | tts --play
 ```
 
 ## Shell Completion

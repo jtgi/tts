@@ -11,6 +11,8 @@ OUTPUT_FORMAT="${TTS_OUTPUT_FORMAT:-mp3_44100_128}"
 API_URL="https://api.elevenlabs.io/v1/text-to-speech"
 DEBUG="${TTS_DEBUG:-}"
 CHUNK_SIZE="${TTS_CHUNK_SIZE:-5000}"  # Characters per chunk for streaming
+PLAY_AUDIO=""  # Play audio directly instead of outputting to stdout
+OPTIMIZE_STREAMING_LATENCY="${TTS_OPTIMIZE_STREAMING_LATENCY:-1}"  # 0-4, higher = lower latency
 
 # Parse command line options
 while [ "$#" -gt 0 ]; do
@@ -39,6 +41,14 @@ while [ "$#" -gt 0 ]; do
             CHUNK_SIZE="$2"
             shift 2
             ;;
+        -p|--play)
+            PLAY_AUDIO=1
+            shift
+            ;;
+        -l|--latency)
+            OPTIMIZE_STREAMING_LATENCY="$2"
+            shift 2
+            ;;
         -h|--help)
             cat >&2 <<EOF
 Usage: tts [OPTIONS] < input.txt > output.mp3
@@ -52,12 +62,17 @@ OPTIONS:
     -f, --format FORMAT    Output format (default: mp3_44100_128)
     -c, --chunk-size SIZE  Characters per chunk for streaming (default: 5000)
     -d, --debug           Enable debug output
+    -p, --play            Play audio directly (macOS only)
+    -l, --latency LEVEL   Optimize streaming latency 0-4 (default: 1)
     -h, --help            Show this help message
 
 EXAMPLES:
     echo "Hello world" | tts > hello.mp3
     cat book.txt | tts -v EXAVITQu4vr4xnSDxMaL > book.mp3
     tts < story.txt | mpv -
+    
+    # Play audio directly (macOS)
+    echo "Hello world" | tts --play
     
     # Process large files with streaming
     cat large_book.txt | tts -c 10000 > book.mp3
@@ -66,12 +81,13 @@ EXAMPLES:
     echo "test" | tts -d > test.mp3
 
 ENVIRONMENT VARIABLES:
-    ELEVENLABS_API_KEY    Default API key
-    TTS_VOICE_ID         Default voice ID
-    TTS_MODEL_ID         Default model ID
-    TTS_OUTPUT_FORMAT    Default output format
-    TTS_DEBUG            Enable debug output (set to 1)
-    TTS_CHUNK_SIZE       Default chunk size for streaming
+    ELEVENLABS_API_KEY              Default API key
+    TTS_VOICE_ID                   Default voice ID
+    TTS_MODEL_ID                   Default model ID
+    TTS_OUTPUT_FORMAT              Default output format
+    TTS_DEBUG                      Enable debug output (set to 1)
+    TTS_CHUNK_SIZE                 Default chunk size for streaming
+    TTS_OPTIMIZE_STREAMING_LATENCY Default latency optimization (0-4)
 EOF
             exit 0
             ;;
@@ -100,6 +116,7 @@ debug "Voice ID: $VOICE_ID"
 debug "Model ID: $MODEL_ID"
 debug "Output Format: $OUTPUT_FORMAT"
 debug "Chunk Size: $CHUNK_SIZE"
+debug "Optimize Streaming Latency: $OPTIMIZE_STREAMING_LATENCY"
 
 # Escape text for JSON
 escape_json() {
@@ -138,77 +155,123 @@ EOF
         cat "$temp_file" >&2
     fi
     
-    # Make API request
-    local response_file=$(mktemp)
-    local headers_file=$(mktemp)
-    local http_code=$(curl -w "%{http_code}" -o "$response_file" -D "$headers_file" -X POST \
-        "${API_URL}/${VOICE_ID}/stream" \
-        -H "Content-Type: application/json" \
-        -H "xi-api-key: ${API_KEY}" \
-        -d "@$temp_file" \
-        $([ -n "$DEBUG" ] && echo "-v") \
-        2>"${temp_file}.err")
-    
-    local curl_exit=$?
-    
-    # Check curl exit code
-    if [ $curl_exit -ne 0 ]; then
-        echo "Error: curl failed with exit code $curl_exit" >&2
-        if [ -n "$DEBUG" ] && [ -f "${temp_file}.err" ]; then
-            echo "Curl error output:" >&2
-            cat "${temp_file}.err" >&2
+    # Make API request with streaming support
+    if [ -n "$PLAY_AUDIO" ]; then
+        # Stream to file and play when ready
+        if command -v afplay >/dev/null 2>&1; then
+            # Download to temp file
+            local audio_temp=$(mktemp).mp3
+            local headers_file=$(mktemp)
+            local http_code=$(curl -w "%{http_code}" -o "$audio_temp" -D "$headers_file" -X POST \
+                "${API_URL}/${VOICE_ID}/stream?optimize_streaming_latency=${OPTIMIZE_STREAMING_LATENCY}" \
+                -H "Content-Type: application/json" \
+                -H "xi-api-key: ${API_KEY}" \
+                -d "@$temp_file" \
+                $([ -n "$DEBUG" ] && echo "-v") \
+                2>"${temp_file}.err")
+            
+            local curl_exit=$?
+            
+            # Check curl exit code
+            if [ $curl_exit -ne 0 ]; then
+                echo "Error: curl failed with exit code $curl_exit" >&2
+                if [ -n "$DEBUG" ] && [ -f "${temp_file}.err" ]; then
+                    echo "Curl error output:" >&2
+                    cat "${temp_file}.err" >&2
+                fi
+                rm -f "$temp_file" "${temp_file}.err" "$audio_temp" "$headers_file"
+                return 1
+            fi
+            
+            # Check HTTP response
+            if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+                # Play the audio file
+                afplay "$audio_temp"
+                rm -f "$temp_file" "${temp_file}.err" "$audio_temp" "$headers_file"
+                return 0
+            else
+                echo "Error: API request failed (HTTP $http_code)" >&2
+                rm -f "$temp_file" "${temp_file}.err" "$audio_temp" "$headers_file"
+                return 1
+            fi
+        else
+            echo "Error: afplay not found. --play option requires macOS." >&2
+            rm -f "$temp_file"
+            return 1
         fi
-        rm -f "$temp_file" "${temp_file}.err" "$response_file"
-        return 1
-    fi
-    
-    # Check HTTP response
-    if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
-        # Success - output the audio data
-        cat "$response_file"
-        rm -f "$temp_file" "${temp_file}.err" "$response_file" "$headers_file"
-        return 0
     else
-        # Error - show details
-        echo "Error: API request failed (HTTP $http_code)" >&2
+        # Standard mode: save to file then output
+        local response_file=$(mktemp)
+        local headers_file=$(mktemp)
+        local http_code=$(curl -w "%{http_code}" -o "$response_file" -D "$headers_file" -X POST \
+            "${API_URL}/${VOICE_ID}/stream?optimize_streaming_latency=${OPTIMIZE_STREAMING_LATENCY}" \
+            -H "Content-Type: application/json" \
+            -H "xi-api-key: ${API_KEY}" \
+            -d "@$temp_file" \
+            $([ -n "$DEBUG" ] && echo "-v") \
+            2>"${temp_file}.err")
         
-        # Show response headers for debugging
-        if [ -n "$DEBUG" ] && [ -f "$headers_file" ]; then
-            echo "Response headers:" >&2
-            cat "$headers_file" >&2
+        local curl_exit=$?
+        
+        # Check curl exit code
+        if [ $curl_exit -ne 0 ]; then
+            echo "Error: curl failed with exit code $curl_exit" >&2
+            if [ -n "$DEBUG" ] && [ -f "${temp_file}.err" ]; then
+                echo "Curl error output:" >&2
+                cat "${temp_file}.err" >&2
+            fi
+            rm -f "$temp_file" "${temp_file}.err" "$response_file"
+            return 1
         fi
         
-        if [ -s "$response_file" ]; then
-            echo "Response body:" >&2
-            cat "$response_file" >&2
+        # Check HTTP response
+        if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+            # Output the audio data to stdout
+            cat "$response_file"
+            rm -f "$temp_file" "${temp_file}.err" "$response_file" "$headers_file"
+            return 0
+        else
+            # Error - show details
+            echo "Error: API request failed (HTTP $http_code)" >&2
+            
+            # Show response headers for debugging
+            if [ -n "$DEBUG" ] && [ -f "$headers_file" ]; then
+                echo "Response headers:" >&2
+                cat "$headers_file" >&2
+            fi
+            
+            if [ -s "$response_file" ]; then
+                echo "Response body:" >&2
+                cat "$response_file" >&2
+            fi
+            
+            if [ -n "$DEBUG" ] && [ -f "${temp_file}.err" ]; then
+                echo "Curl debug output:" >&2
+                cat "${temp_file}.err" >&2
+            fi
+            
+            # Common error explanations
+            case "$http_code" in
+                401)
+                    echo "Hint: Authentication failed. Check your API key." >&2
+                    ;;
+                403)
+                    echo "Hint: Access forbidden. API key may lack permissions." >&2
+                    ;;
+                404)
+                    echo "Hint: Voice ID '$VOICE_ID' not found." >&2
+                    ;;
+                429)
+                    echo "Hint: Rate limit exceeded. Try again later." >&2
+                    ;;
+                500|502|503)
+                    echo "Hint: Server error. ElevenLabs API may be down." >&2
+                    ;;
+            esac
+            
+            rm -f "$temp_file" "${temp_file}.err" "$response_file" "$headers_file"
+            return 1
         fi
-        
-        if [ -n "$DEBUG" ] && [ -f "${temp_file}.err" ]; then
-            echo "Curl debug output:" >&2
-            cat "${temp_file}.err" >&2
-        fi
-        
-        # Common error explanations
-        case "$http_code" in
-            401)
-                echo "Hint: Authentication failed. Check your API key." >&2
-                ;;
-            403)
-                echo "Hint: Access forbidden. API key may lack permissions." >&2
-                ;;
-            404)
-                echo "Hint: Voice ID '$VOICE_ID' not found." >&2
-                ;;
-            429)
-                echo "Hint: Rate limit exceeded. Try again later." >&2
-                ;;
-            500|502|503)
-                echo "Hint: Server error. ElevenLabs API may be down." >&2
-                ;;
-        esac
-        
-        rm -f "$temp_file" "${temp_file}.err" "$response_file" "$headers_file"
-        return 1
     fi
 }
 
