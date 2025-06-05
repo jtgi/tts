@@ -1,0 +1,70 @@
+name: Auto Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=v${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          git log $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "") --pretty=format:"- %s" HEAD >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          body: |
+            ## What's Changed
+            ${{ steps.changelog.outputs.CHANGELOG }}
+            
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")...${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
+      - name: Update Homebrew formula
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          VERSION="${VERSION#v}"
+          SHA256=$(curl -sL https://github.com/${{ github.repository }}/archive/refs/tags/${{ steps.version.outputs.VERSION }}.tar.gz | sha256sum | cut -d' ' -f1)
+          
+          sed -i "s/version \".*\"/version \"${VERSION}\"/" tts.rb
+          sed -i "s/sha256 \".*\"/sha256 \"${SHA256}\"/" tts.rb
+          
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add tts.rb
+          git commit -m "Update Homebrew formula to ${VERSION}" || echo "No changes to commit"
+          git push origin HEAD:main || echo "No changes to push"
